@@ -13,45 +13,26 @@ import java.sql.SQLException;
 public class UserDao {
 
     private DataSource dataSource;
+    private JdbcContext jdbcContext;
 
     public void setDataSource(DataSource dataSource) {
         this.dataSource = dataSource;
     }
 
-    public void jdbcContextWithStatementStrategy(StatementStrategy st) throws SQLException {
-        Connection conn = null;
-        PreparedStatement ps = null;
-
-        try {
-            conn = dataSource.getConnection();
-            ps = st.makePreparedStatement(conn); //주입 된 전략에 따라 실행
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            throw e;
-        } finally {
-            if(ps!=null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {}
-            }
-            if(conn!=null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {}
-            }
-        }
+    public void setJdbcContext(JdbcContext jdbcContext) {
+        this.jdbcContext = jdbcContext;
     }
 
     public void add(User user) throws SQLException {
         StatementStrategy statementStrategy = new AddStatement(user); //전략 클래스의 오브젝트 생성
-        jdbcContextWithStatementStrategy(statementStrategy); //컨텍스트 호출, 전략오브젝트 전달
+        jdbcContext.jdbcContextWithStatementStrategy(statementStrategy); //컨텍스트 호출, 전략오브젝트 전달
     }
 
     public void deleteAll() throws SQLException {
         /*
         익명 클래스로 선언하는 방법
          */
-        jdbcContextWithStatementStrategy(conn -> conn.prepareStatement("delete from users"));
+        jdbcContext.jdbcContextWithStatementStrategy(conn -> conn.prepareStatement("delete from users"));
     }
 
     public User get(String id) throws SQLException {

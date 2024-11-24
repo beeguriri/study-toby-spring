@@ -30,7 +30,12 @@ class UserDaoTest {
                 "jdbc:mysql://localhost/testdb?characterEncoding=UTF-8",
                 "root", "1234",
                 true);
+
+        JdbcContext jdbcContext = new JdbcContext();
+        jdbcContext.setDataSource(dataSource);
+
         userDao.setDataSource(dataSource);
+        userDao.setJdbcContext(jdbcContext);
 
         userDao.deleteAll();
         assertEquals(userDao.getCount(), 0);

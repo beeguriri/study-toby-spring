@@ -20,11 +20,19 @@ public class DaoFactory {
         return dataSource;
     }
 
+    @Bean
+    public JdbcContext jdbcContext() {
+        JdbcContext jdbcContext = new JdbcContext();
+        jdbcContext.setDataSource(dataSource());
+        return jdbcContext;
+    }
+
     //userdao가 어떤 db와 연결을 할 지 결정을 하는 bean
     @Bean
     public UserDao userDao() {
         UserDao userDao = new UserDao();
-        userDao.setDataSource(dataSource());
+        userDao.setDataSource(dataSource()); //곧 삭제 할 예정 -> userDao의 rs 가지고 있는 부분 리팩토링 전
+        userDao.setJdbcContext(jdbcContext());
         return userDao;
     }
 }

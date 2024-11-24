@@ -36,4 +36,9 @@ public class JdbcContext {
             }
         }
     }
+
+    //다른 곳에서도 사용할 가능성이 있는 메서드
+    public void executeSql(String query) throws SQLException {
+        jdbcContextWithStatementStrategy(conn -> conn.prepareStatement(query));
+    }
 }

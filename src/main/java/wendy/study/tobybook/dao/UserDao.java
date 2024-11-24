@@ -29,10 +29,7 @@ public class UserDao {
     }
 
     public void deleteAll() throws SQLException {
-        /*
-        익명 클래스로 선언하는 방법
-         */
-        jdbcContext.jdbcContextWithStatementStrategy(conn -> conn.prepareStatement("delete from users"));
+        this.jdbcContext.executeSql("delete from users");
     }
 
     public User get(String id) throws SQLException {

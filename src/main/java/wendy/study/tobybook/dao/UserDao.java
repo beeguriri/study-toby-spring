@@ -18,20 +18,16 @@ public class UserDao {
         this.dataSource = dataSource;
     }
 
-    public void add(User user) throws SQLException {
-
+    public void jdbcContextWithStatementStrategy(StatementStrategy st) throws SQLException {
         Connection conn = null;
         PreparedStatement ps = null;
 
         try {
             conn = dataSource.getConnection();
-            ps = conn.prepareStatement("insert into users(id, name, password) values(?,?,?)");
-            ps.setString(1, user.getId());
-            ps.setString(2, user.getName());
-            ps.setString(3, user.getPassword());
+            ps = st.makePreparedStatement(conn); //주입 된 전략에 따라 실행
             ps.executeUpdate();
         } catch (SQLException e) {
-            throw  e;
+            throw e;
         } finally {
             if(ps!=null) {
                 try {
@@ -44,6 +40,16 @@ public class UserDao {
                 } catch (SQLException e) {}
             }
         }
+    }
+
+    public void add(User user) throws SQLException {
+        StatementStrategy statementStrategy = new AddStatement(user); //전략 클래스의 오브젝트 생성
+        jdbcContextWithStatementStrategy(statementStrategy); //컨텍스트 호출, 전략오브젝트 전달
+    }
+
+    public void deleteAll() throws SQLException {
+        StatementStrategy statementStrategy = new DeleteAllStatement(); //전략 클래스의 오브젝트 생성
+        jdbcContextWithStatementStrategy(statementStrategy); //컨텍스트 호출, 전략오브젝트 전달
     }
 
     public User get(String id) throws SQLException {
@@ -83,30 +89,6 @@ public class UserDao {
             }
         }
         return user;
-    }
-
-    public void deleteAll() throws SQLException {
-        Connection conn = null;
-        PreparedStatement ps = null;
-        
-        try {
-            conn = dataSource.getConnection();
-            ps = conn.prepareStatement("delete from users"); //변하는 부분
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            throw  e;
-        } finally {
-            if(ps!=null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {}
-            }
-            if(conn!=null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {}
-            }
-        }
     }
 
     public int getCount() throws SQLException  {

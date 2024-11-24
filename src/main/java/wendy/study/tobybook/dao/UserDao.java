@@ -48,8 +48,10 @@ public class UserDao {
     }
 
     public void deleteAll() throws SQLException {
-        StatementStrategy statementStrategy = new DeleteAllStatement(); //전략 클래스의 오브젝트 생성
-        jdbcContextWithStatementStrategy(statementStrategy); //컨텍스트 호출, 전략오브젝트 전달
+        /*
+        익명 클래스로 선언하는 방법
+         */
+        jdbcContextWithStatementStrategy(conn -> conn.prepareStatement("delete from users"));
     }
 
     public User get(String id) throws SQLException {
@@ -123,5 +125,26 @@ public class UserDao {
         }
 
         return count;
+    }
+
+    /*
+    내부 클래스로 선언하는 방법
+     */
+    static class AddStatement implements StatementStrategy {
+
+        User user;
+
+        public AddStatement(User user) {
+            this.user = user;
+        }
+
+        @Override
+        public PreparedStatement makePreparedStatement(Connection conn) throws SQLException {
+            PreparedStatement ps = conn.prepareStatement("insert into users(id, name, password) values(?,?,?)");
+            ps.setString(1, user.getId());
+            ps.setString(2, user.getName());
+            ps.setString(3, user.getPassword());
+            return ps;
+        }
     }
 }

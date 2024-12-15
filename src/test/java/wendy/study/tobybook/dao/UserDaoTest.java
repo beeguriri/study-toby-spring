@@ -2,11 +2,13 @@ package wendy.study.tobybook.dao;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import wendy.study.tobybook.domain.User;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
+import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -22,7 +24,7 @@ class UserDaoTest {
     UserDao userDao;
 
     @BeforeEach
-    void setup () throws SQLException {
+    void setup () {
 
         //테스트를 위한 db 설정
         userDao = new UserDao();
@@ -31,18 +33,13 @@ class UserDaoTest {
                 "root", "1234",
                 true);
 
-        JdbcContext jdbcContext = new JdbcContext();
-        jdbcContext.setDataSource(dataSource);
-
         userDao.setDataSource(dataSource);
-        userDao.setJdbcContext(jdbcContext);
-
         userDao.deleteAll();
         assertEquals(userDao.getCount(), 0);
     }
 
     @Test
-    void add() throws SQLException {
+    void add() {
         User user = new User();
 
         user.setId("id1");
@@ -54,7 +51,7 @@ class UserDaoTest {
     }
 
     @Test
-    void add2() throws SQLException {
+    void add2() {
         User user = new User();
 
         user.setId("id1");
@@ -62,9 +59,27 @@ class UserDaoTest {
         user.setPassword("1234");
         userDao.add(user);
 
-        assertThrows(SQLException.class, () -> {
+        assertThrows(EmptyResultDataAccessException.class, () -> {
             userDao.get("id2");
         });
     }
 
+    @Test
+    void getCount() {
+
+        User user = new User();
+
+        user.setId("id1");
+        user.setName("test1");
+        user.setPassword("1234");
+        userDao.add(user);
+
+        assertEquals(userDao.getCount(), 1);
+
+    }
+
+    @Test
+    void getAll() {
+        assertEquals(userDao.getAll(), Collections.emptyList());
+    }
 }

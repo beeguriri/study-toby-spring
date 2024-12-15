@@ -1,108 +1,58 @@
 package wendy.study.tobybook.dao;
 
 import lombok.NoArgsConstructor;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import wendy.study.tobybook.domain.User;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.util.List;
 
 @NoArgsConstructor
 public class UserDao {
 
-    private DataSource dataSource;
-    private JdbcContext jdbcContext;
+    private JdbcTemplate jdbcTemplate;
 
     public void setDataSource(DataSource dataSource) {
-        this.dataSource = dataSource;
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
-    public void setJdbcContext(JdbcContext jdbcContext) {
-        this.jdbcContext = jdbcContext;
-    }
-
-    public void add(User user) throws SQLException {
-        this.jdbcContext.executeSql(
-                "insert into users(id, name, password) values(?,?,?)",
+    public void add(User user) {
+        this.jdbcTemplate.update("insert into users(id, name, password) values(?,?,?)",
                 user.getId(), user.getName(), user.getPassword());
     }
 
-    public void deleteAll() throws SQLException {
-        this.jdbcContext.executeSql("delete from users");
+    public void deleteAll() {
+        this.jdbcTemplate.update("delete from users");
     }
 
-    public User get(String id) throws SQLException {
+    //queryForObject -> 1row만 반환
+    // 쿼리가 결과를 반환하지 않으면 EmptyResultDataAccessException
+    // 쿼리가 2개 이상의 row를 반환하면 IncorrectResultSizeDataAccessException
+    public User get(String id) {
+        String query = "select * from users where id = ?";
+        return this.jdbcTemplate.queryForObject(query, userRowMapper(), id);
+    }
 
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        User user = new User();
+    //query -> list 반환
+    // 결과가 없으면 빈 리스트를 반환
+    public List<User> getAll() {
+        String query = "select * from users";
+        return this.jdbcTemplate.query(query, userRowMapper());
+    }
 
-        try {
-            conn = dataSource.getConnection();
-            ps = conn.prepareStatement("select * from users where id = ?"); //변하는 부분
-            ps.setString(1, id);
-            rs = ps.executeQuery();
-            rs.next();
+    //공통기능 추출
+    private RowMapper<User> userRowMapper() {
+        return (rs, rowNum) -> {
+            User user = new User();
             user.setId(rs.getString("id"));
             user.setName(rs.getString("name"));
             user.setPassword(rs.getString("password"));
-
-        } catch (SQLException e) {
-            throw e;
-        } finally {
-            if(rs!=null) {
-                try {
-                    rs.close();
-                } catch (SQLException e) {}
-            }
-            if(ps!=null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {}
-            }
-            if(conn!=null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {}
-            }
-        }
-        return user;
+            return user;
+        };
     }
 
-    public int getCount() throws SQLException  {
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        int count = 0;
-        try {
-            conn = dataSource.getConnection();
-            ps = conn.prepareStatement("select count(*) from users"); //변하는 부분
-            rs = ps.executeQuery();
-            rs.next();
-            count = rs.getInt(1);
-        } catch (SQLException e) {
-            throw  e;
-        } finally {
-            if(rs!=null) {
-                try {
-                    rs.close();
-                } catch (SQLException e) {}
-            }
-            if(ps!=null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {}
-            }
-            if(conn!=null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {}
-            }
-        }
-
-        return count;
+    public int getCount() {
+        return this.jdbcTemplate.queryForObject("select count(*) from users", Integer.class);
     }
 }

@@ -34,6 +34,16 @@ public class UserDao {
         }
     }
 
+    public void update(User user) {
+        try {
+            this.jdbcTemplate.update("update users set name = ?, password = ?, level = ?, login = ?, recommend = ? where id = ?",
+                    user.getName(), user.getPassword(), user.getLevel().intValue(), user.getLogin(), user.getRecommend(),
+                    user.getId());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public void deleteAll() {
         this.jdbcTemplate.update("delete from users");
     }

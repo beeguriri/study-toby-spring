@@ -12,8 +12,7 @@ import wendy.study.tobybook.exception.DuplicateUserIdException;
 import javax.sql.DataSource;
 import java.util.Collections;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 /*
 스프링 API에 의존하지않고 테스트 만들기
@@ -127,5 +126,28 @@ class UserDaoTest {
         User findUser = userDao.get("id1");
 
         assertEquals(findUser, newUser);
+    }
+
+    @Test
+    @DisplayName("유저 수정 테스트")
+    public void updateUser() {
+        User user = new User();
+        user.setId("id1");
+        user.setName("test1");
+        user.setPassword("1234");
+        user.setLevel(Level.BASIC);
+        user.setLogin(0);
+        user.setRecommend(0);
+        userDao.add(user);
+
+        User user1 = userDao.get("id1");
+        user1.setName("updateTestUser1");
+        userDao.update(user1);
+
+        User updateUser = userDao.get("id1");
+
+        assertEquals(user1, updateUser);
+        assertNotEquals(updateUser, user);
+
     }
 }

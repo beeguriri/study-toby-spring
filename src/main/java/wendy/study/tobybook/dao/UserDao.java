@@ -23,7 +23,7 @@ public class UserDao {
     public void add(User user) {
         try {
             this.jdbcTemplate.update("insert into users(id, name, password, level, login, recommend) values(?,?,?,?,?,?)",
-                    user.getId(), user.getName(), user.getPassword(), user.getLevel().intValue(), user.getLogin(), user.getRecommend());
+                    user.getId(), user.getName(), user.getPassword(), user.getLevel().getValue(), user.getLogin(), user.getRecommend());
         } catch (DuplicateKeyException dke) {
             throw new DuplicateUserIdException(dke);
         } catch (Exception e) {
@@ -34,7 +34,7 @@ public class UserDao {
     public void update(User user) {
         try {
             this.jdbcTemplate.update("update users set name = ?, password = ?, level = ?, login = ?, recommend = ? where id = ?",
-                    user.getName(), user.getPassword(), user.getLevel().intValue(), user.getLogin(), user.getRecommend(),
+                    user.getName(), user.getPassword(), user.getLevel().getValue(), user.getLogin(), user.getRecommend(),
                     user.getId());
         } catch (Exception e) {
             throw new RuntimeException(e);

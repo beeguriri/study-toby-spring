@@ -1,17 +1,17 @@
 package wendy.study.tobybook.constant;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@AllArgsConstructor
+@Getter
 public enum Level {
-    BASIC(1), SILVER(2), GOLD(3);
+    GOLD(3, null),
+    SILVER(2, GOLD),
+    BASIC(1, SILVER);
 
     private final int value;
-
-    Level(int value) {
-        this.value = value;
-    }
-
-    public int intValue() {
-        return value;
-    }
+    private final Level next;
 
     public static Level valueOf(int value) {
         return switch (value) {

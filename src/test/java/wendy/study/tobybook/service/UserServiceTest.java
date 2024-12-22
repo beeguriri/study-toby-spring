@@ -13,12 +13,13 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static wendy.study.tobybook.service.UserServiceImpl.MIN_LOGIN_COUNT_FOR_SILVER;
-import static wendy.study.tobybook.service.UserServiceImpl.MIN_RECOMMEND_COUNT_FOR_GOLD;
+import static wendy.study.tobybook.service.UserLevelUpgradePolicyImpl.MIN_LOGIN_COUNT_FOR_SILVER;
+import static wendy.study.tobybook.service.UserLevelUpgradePolicyImpl.MIN_RECOMMEND_COUNT_FOR_GOLD;
 
 class UserServiceTest {
 
     UserDao userDao;
+    UserLevelUpgradePolicy userLevelUpgradePolicy;
     UserService userService;
 
     @BeforeEach
@@ -31,7 +32,8 @@ class UserServiceTest {
                 "root", "1234",
                 true);
         userDao.setDataSource(dataSource);
-        userService = new UserServiceImpl(userDao);
+        userLevelUpgradePolicy = new UserLevelUpgradePolicyImpl(userDao);
+        userService = new UserServiceImpl(userDao, userLevelUpgradePolicy);
 
         userDao.deleteAll();
         assertEquals(userDao.getCount(), 0);

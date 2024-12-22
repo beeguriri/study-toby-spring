@@ -2,9 +2,11 @@ package wendy.study.tobybook.dao;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import wendy.study.tobybook.domain.User;
+import wendy.study.tobybook.exception.DuplicateUserIdException;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
@@ -39,7 +41,7 @@ class UserDaoTest {
     }
 
     @Test
-    void add() {
+    void add()throws DuplicateUserIdException {
         User user = new User();
 
         user.setId("id1");
@@ -61,6 +63,20 @@ class UserDaoTest {
 
         assertThrows(EmptyResultDataAccessException.class, () -> {
             userDao.get("id2");
+        });
+    }
+
+    @Test
+    void add3() {
+        User user = new User();
+
+        user.setId("id1");
+        user.setName("test1");
+        user.setPassword("1234");
+        userDao.add(user);
+
+        assertThrows(DuplicateUserIdException.class, () -> {
+            userDao.add(user);
         });
     }
 

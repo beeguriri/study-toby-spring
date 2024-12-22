@@ -1,11 +1,16 @@
 package wendy.study.tobybook.dao;
 
+import com.mysql.cj.exceptions.MysqlErrorNumbers;
 import lombok.NoArgsConstructor;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.web.bind.annotation.PathVariable;
 import wendy.study.tobybook.domain.User;
+import wendy.study.tobybook.exception.DuplicateUserIdException;
 
 import javax.sql.DataSource;
+import java.sql.SQLException;
 import java.util.List;
 
 @NoArgsConstructor
@@ -18,8 +23,14 @@ public class UserDao {
     }
 
     public void add(User user) {
-        this.jdbcTemplate.update("insert into users(id, name, password) values(?,?,?)",
-                user.getId(), user.getName(), user.getPassword());
+        try {
+            this.jdbcTemplate.update("insert into users(id, name, password) values(?,?,?)",
+                    user.getId(), user.getName(), user.getPassword());
+        } catch (DuplicateKeyException dke) {
+            throw new DuplicateUserIdException(dke);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void deleteAll() {

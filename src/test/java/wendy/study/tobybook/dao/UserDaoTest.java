@@ -1,15 +1,15 @@
 package wendy.study.tobybook.dao;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
+import wendy.study.tobybook.constant.Level;
 import wendy.study.tobybook.domain.User;
 import wendy.study.tobybook.exception.DuplicateUserIdException;
 
 import javax.sql.DataSource;
-import java.sql.SQLException;
 import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -41,12 +41,15 @@ class UserDaoTest {
     }
 
     @Test
-    void add()throws DuplicateUserIdException {
+    void add() throws DuplicateUserIdException {
         User user = new User();
 
         user.setId("id1");
         user.setName("test1");
         user.setPassword("1234");
+        user.setLevel(Level.BASIC);
+        user.setLogin(0);
+        user.setRecommend(0);
         userDao.add(user);
 
         assertEquals(user, userDao.get("id1"));
@@ -59,6 +62,9 @@ class UserDaoTest {
         user.setId("id1");
         user.setName("test1");
         user.setPassword("1234");
+        user.setLevel(Level.BASIC);
+        user.setLogin(0);
+        user.setRecommend(0);
         userDao.add(user);
 
         assertThrows(EmptyResultDataAccessException.class, () -> {
@@ -73,6 +79,9 @@ class UserDaoTest {
         user.setId("id1");
         user.setName("test1");
         user.setPassword("1234");
+        user.setLevel(Level.BASIC);
+        user.setLogin(0);
+        user.setRecommend(0);
         userDao.add(user);
 
         assertThrows(DuplicateUserIdException.class, () -> {
@@ -88,6 +97,9 @@ class UserDaoTest {
         user.setId("id1");
         user.setName("test1");
         user.setPassword("1234");
+        user.setLevel(Level.BASIC);
+        user.setLogin(0);
+        user.setRecommend(0);
         userDao.add(user);
 
         assertEquals(userDao.getCount(), 1);
@@ -97,5 +109,23 @@ class UserDaoTest {
     @Test
     void getAll() {
         assertEquals(userDao.getAll(), Collections.emptyList());
+    }
+
+    @Test
+    @DisplayName("같은 유저인지 확인하기")
+    public void checkSameUser() {
+        User newUser = new User();
+        newUser.setId("id1");
+        newUser.setName("id1");
+        newUser.setPassword("id1234");
+        newUser.setLevel(Level.BASIC);
+        newUser.setLogin(10);
+        newUser.setRecommend(1);
+
+        userDao.add(newUser);
+
+        User findUser = userDao.get("id1");
+
+        assertEquals(findUser, newUser);
     }
 }

@@ -3,7 +3,9 @@ package wendy.study.tobybook.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
+import org.springframework.transaction.PlatformTransactionManager;
 import wendy.study.tobybook.constant.Level;
 import wendy.study.tobybook.dao.UserDao;
 import wendy.study.tobybook.domain.User;
@@ -21,6 +23,7 @@ class UserServiceTest {
     UserDao userDao;
     UserLevelUpgradePolicy userLevelUpgradePolicy;
     UserService userService;
+    PlatformTransactionManager platformTransactionManager;
 
     @BeforeEach
     public void setUp() {
@@ -33,7 +36,11 @@ class UserServiceTest {
                 true);
         userDao.setDataSource(dataSource);
         userLevelUpgradePolicy = new UserLevelUpgradePolicyImpl(userDao);
-        userService = new UserServiceImpl(userDao, userLevelUpgradePolicy);
+
+        //트랜잭션매니저 설정
+        platformTransactionManager = new DataSourceTransactionManager(dataSource);
+
+        userService = new UserServiceImpl(userDao, userLevelUpgradePolicy, platformTransactionManager);
 
         userDao.deleteAll();
         assertEquals(userDao.getCount(), 0);
